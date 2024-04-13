@@ -1,0 +1,174 @@
+@model BazaarResearchApp.Models.ItemViewModel
+
+@{
+    ViewData["Title"] = "アイテム詳細";
+}
+
+<h1>アイテム詳細</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                アイテム名
+            </th>
+            <th>
+                店売り価格[G]
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                @Html.DisplayFor(model => model.Item.Name)
+            </td>
+            <td>
+                @if (Model.Item.NpcPrice != 0)
+                {
+                    @Html.DisplayFor(model => model.Item.NpcPrice);
+                }
+                else
+                {
+                    <p>バザーのみ</p>
+                }
+            </td>
+        </tr>
+    </tbody>
+</table>
+@if (Model.Searches != null && Model.Searches.Count() > 0)
+{
+    <div id="chart_div"></div>
+    @if (Model.Profit != null)
+    {
+        <div class="d-flex">
+            <table class="table" style="margin: 0 5px 0 0;">
+                <thead>
+                    <tr>
+                        <th>レシピ</th>
+                        <th>数量</th>
+                        <th>単価</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var recipe in Model.Profit.Recipe)
+                    {
+                        var (price, quantity) = recipe.Value;
+                        <tr>
+                            <td><a asp-action="Index" asp-route-id="@recipe.Key.Id">@recipe.Key.Name</a></td>
+                            <td>@quantity こ</td>
+                            <td>@price G</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <table class="table" style="margin: 0 0 0 5px;">
+                <thead>
+                    <tr>
+                        <th>状態</th>
+                        <th>利益</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>失敗(原価)</td>
+                        <td>@Model.Profit.FailProfit G</td>
+                    </tr>
+                    <tr>
+                        <td>星0</td>
+                        <td>@Model.Profit.Success0Profit G</td>
+                    </tr>
+                    <tr>
+                        <td>星1</td>
+                        <td>@Model.Profit.Success1Profit G</td>
+                    </tr>
+                    <tr>
+                        <td>星2</td>
+                        <td>@Model.Profit.Success2Profit G</td>
+                    </tr>
+                    <tr>
+                        <td>星3</td>
+                        <td>@Model.Profit.Success3Profit G</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    }
+
+
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    // Razorビュー内でサーバーサイドでデータをJSONに変換する
+    <script type="text/javascript">
+        var searchData = @Html.Raw(Json.Serialize(Model.Searches.Select(x => new
+                    {
+                        CreatedAt = x.CreatedAt,
+                        SinglePriceAverage = x.SinglePriceAverage
+                    })));
+        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.setOnLoadCallback(function () {
+            drawChart(searchData);
+        });
+
+        console.log(searchData);
+        function drawChart(searchData) {
+            searchData.forEach(search => {
+                const convertedDate = new Date(search.createdAt);
+                console.log(convertedDate, search.singlePriceAverage);
+            });
+
+            var data = google.visualization.arrayToDataTable([
+                ['日時', '価格[G]'],
+                // searchDataを使ってデータを生成
+                ...searchData.map(search => [new Date(search.createdAt), search.singlePriceAverage])
+            ]);
+
+            var options = {
+                title: 'バザー価格推移',
+                curveType: 'function',
+                legend: { position: 'bottom' },
+                hAxis: {
+                    format: 'MM/dd HH:mm', // 任意の日付フォーマットを指定
+                }
+            };
+            var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+    </script>
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                    出品数
+                </th>
+                <th>
+                    平均単価[G]
+                </th>
+                <th>
+                    調査時刻
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Searches)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Lists" asp-action="Index" asp-route-id="@item.Id">表示</a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.NumberOfListing)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.SinglePriceAverage)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedAt)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}

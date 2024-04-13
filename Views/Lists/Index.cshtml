@@ -1,0 +1,59 @@
+@model BazaarResearchApp.Models.ListsViewModel
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>@Model.ItemName 単価安値上位10件<small>@Model.Date 時点</small></h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                価格[G]
+            </th>
+            <th>
+                個数
+            </th>
+            <th>
+                単価[G]
+            </th>
+            <th>
+                出品者
+            </th>
+            <th>
+                出品開始日
+            </th>
+            <th>
+                出品終了日
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Lists) {
+        <tr>
+            @{
+                var start = item.Start.ToString("yyyy-MM-dd");
+                var end = item.End.ToString("yyyy-MM-dd");
+            }
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SinglePrice)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Seller)
+            </td>
+            <td>
+                @start
+            </td>
+            <td>
+                @end
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

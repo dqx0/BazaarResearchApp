@@ -1,0 +1,47 @@
+﻿@model BazaarResearchApp.Models.SearchViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                アイテム名
+            </th>
+            <th>
+                店売り価格
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Items != null)
+        {
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Items" asp-action="Index" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Name)</a>
+                    </td>
+                    <td>
+                        @if (item.NpcPrice != 0)
+                        {
+                            @Html.DisplayFor(modelItem => item.NpcPrice);
+                        }
+                        else
+                        {
+                            <p>バザーのみ</p>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+            
+
+    </tbody>
+</table>
